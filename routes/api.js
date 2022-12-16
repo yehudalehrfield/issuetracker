@@ -4,7 +4,10 @@ module.exports = function (app, issueModel) {
     .get(async (req, res) => {
       // add query params
       const { project } = req.params;
-      const issues = await issueModel.find({ project_name: project });
+      const searchParams = req.query;
+      searchParams.project_name = project;
+      console.log(searchParams);
+      const issues = await issueModel.find(searchParams);
       res.send(issues);
     })
 
