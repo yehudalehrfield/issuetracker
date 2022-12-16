@@ -18,24 +18,25 @@ try {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-  console.log('connected to mongo');
+  console.log('Connected to mongo');
 } catch {
-  console.log('could not connect to mongo');
+  console.log('Error: Could not connect to mongo');
 }
 
 // define new schema
 const issueSchema = new mongoose.Schema({
+  project_name: { type: String, required: true },
   issue_title: { type: String, required: true },
   issue_text: { type: String, required: true },
   created_on: { type: Date, required: true },
   updated_on: Date,
   created_by: String,
   assigned_to: String,
-  open: String,
+  open: { type: Boolean, default: true },
   status_text: String,
 });
 
-const issue = mongoose.model('issue', issueSchema);
+const issueModel = mongoose.model('issue', issueSchema);
 
 app.use('/public', express.static(`${process.cwd()}/public`));
 
@@ -60,7 +61,7 @@ app.route('/')
 fccTestingRoutes(app);
 
 // Routing for API
-apiRoutes(app);
+apiRoutes(app, issueModel);
 
 // 404 Not Found Middleware
 app.use((req, res, next) => {
