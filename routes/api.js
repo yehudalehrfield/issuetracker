@@ -1,27 +1,19 @@
-'use strict';
-
 module.exports = function (app) {
-
   app.route('/api/issues/:project')
-  
-    .get(function (req, res){
-      let project = req.params.project;
-      
+
+    .get((req, res) => {
+      const { project } = req.params;
     })
-    
-    .post(function (req, res){
-      let project = req.params.project;
-      
+
+    .post((req, res) => {
+      const { project } = req.params;
     })
-    
-    .put(function (req, res){
-      let project = req.params.project;
-      
+
+    .put((req, res) => {
+      const { project } = req.params;
     })
-    
-    .delete(function (req, res){
-      let project = req.params.project;
-      
+
+    .delete((req, res) => {
+      const { project } = req.params;
     });
-    
 };
