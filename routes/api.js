@@ -65,7 +65,14 @@ module.exports = (app, issueModel) => {
       }
     })
 
-    .delete((req, res) => {
-      const { project } = req.params;
+    .delete(async (req, res) => {
+      // const { project } = req.params;
+      try {
+        const issueToDelete = await issueModel.findByIdAndDelete(req.body._id);
+        console.log(issueToDelete);
+        res.json({ result: 'successfully deleted', _id: req.body._id });
+      } catch {
+        res.json({ result: 'could not delete', _id: req.body._id });
+      }
     });
 };
