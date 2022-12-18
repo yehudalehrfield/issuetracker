@@ -1,4 +1,4 @@
-module.exports = function (app, issueModel) {
+module.exports = (app, issueModel) => {
   app.route('/api/issues/:project')
 
     .get(async (req, res) => {
@@ -31,8 +31,38 @@ module.exports = function (app, issueModel) {
       }
     })
 
-    .put((req, res) => {
-      const { project } = req.params;
+    .put(async (req, res) => {
+      // const { project } = req.params; // why is this needed? or is it?
+      const todayDateAndTime = new Date();
+      const updatedFields = { updated_on: todayDateAndTime };
+      // get all updated fields (those not empty in the form)
+      Object.keys(req.body).forEach((prop) => {
+        if (req.body[prop]) {
+          updatedFields[prop] = req.body[prop];
+        }
+      });
+      console.log(req.body);
+      console.log(updatedFields);
+      console.log(`updated fields length: ${Object.keys(updatedFields).length}`);
+      if (!req.body._id) {
+        res.json({ error: 'missing id' });
+      } else if (Object.keys(updatedFields).length < 3) {
+        res.json({
+          error: 'no update field(s) sent',
+          _id: req.body._id,
+        });
+      } else {
+        const updatedIssue = await issueModel.findByIdAndUpdate(
+          req.body._id,
+          updatedFields,
+          { returnDocument: 'after' },
+        );
+        console.log(updatedIssue);
+        res.json({
+          result: 'successfully updated',
+          _id: req.body._id,
+        });
+      }
     })
 
     .delete((req, res) => {
