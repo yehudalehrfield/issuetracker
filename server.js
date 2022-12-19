@@ -12,7 +12,7 @@ const runner = require('./test-runner');
 
 const app = express();
 
-// connect to mongoose
+// connect to mongodb via mongoose
 try {
   mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -36,6 +36,7 @@ const issueSchema = new mongoose.Schema({
   status_text: String,
 });
 
+// create new model
 const issueModel = mongoose.model('issue', issueSchema);
 
 app.use('/public', express.static(`${process.cwd()}/public`));
