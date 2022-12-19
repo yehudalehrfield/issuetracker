@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 module.exports = (app, issueModel) => {
   app.route('/api/issues/:project')
 
@@ -44,26 +46,36 @@ module.exports = (app, issueModel) => {
           updatedFields[prop] = req.body[prop];
         }
       });
-      if (!req.body._id) { // no id
+      if (!req.body._id) {
+        // if no id, return error for missing id
         res.json({ error: 'missing _id' });
+      } else if (!mongoose.Types.ObjectId.isValid(req.body._id)) {
+        // if invalid id, return update error
+        res.json({
+          error: 'could not update',
+          _id: req.body._id,
+        });
       } else if (Object.keys(updatedFields).length < 3) { // no updated fields
+        // if there are no updated fields, return error for no updates
         res.json({
           error: 'no update field(s) sent',
           _id: req.body._id,
         });
       } else {
-        try { // update the issue
-          const updatedIssue = await issueModel.findByIdAndUpdate(
-            req.body._id,
+        try {
+          // get the issue doc and update
+          await issueModel.findByIdAndUpdate(
+            mongoose.Types.ObjectId(req.body._id),
             updatedFields,
             { returnDocument: 'after' },
           );
-          console.log(`Updated issue item: ${updatedIssue}`);
           res.json({
             result: 'successfully updated',
             _id: req.body._id,
           });
-        } catch { // catch errors updating
+        } catch {
+          // catch any other errors, return update error
+          // valid id but not exisiting (?)
           res.json({
             error: 'could not update',
             _id: req.body._id,
@@ -74,18 +86,21 @@ module.exports = (app, issueModel) => {
 
     .delete(async (req, res) => {
       // const { project } = req.params; // necessary?
-      // check for missing id
       if (!req.body._id) {
+        // if missing id, return error
         res.json({ error: 'missing _id' });
+      } else if (!mongoose.Types.ObjectId.isValid(req.body._id)) {
+        // if invalid id, return error in deletion
+        res.json({ error: 'could not delete', _id: req.body._id });
       } else {
         try {
           // delete doc from the database
-          const issueToDelete = await issueModel.findByIdAndDelete(req.body._id);
-          console.log(`Deleted: ${issueToDelete}`);
+          await issueModel.findByIdAndDelete(req.body._id);
           // return upon successful deletion
           res.json({ result: 'successfully deleted', _id: req.body._id });
         } catch {
-          // return error in deletion
+          // catch any other errors, return error in deletion
+          // valid id but not exisiting (?)
           res.json({ error: 'could not delete', _id: req.body._id });
         }
       }

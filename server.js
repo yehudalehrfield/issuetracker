@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const bodyParser = require('body-parser');
-const { expect } = require('chai');
+// const { expect } = require('chai');
 const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
@@ -69,6 +69,7 @@ app.use((req, res, next) => {
   res.status(404)
     .type('text')
     .send('Not Found');
+  next();
 });
 
 // Start our server and tests!
