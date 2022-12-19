@@ -18,11 +18,8 @@ suite('Functional Tests', () => {
       .send({
         issue_title: 'Fill all fields',
         issue_text: 'POST request with all issue fields filled',
-        // created_on: todayAndNow,
-        // updated_on: todayAndNow,
         created_by: 'YL',
         assigned_to: 'YL',
-        // open: true,
         status_text: 'In QA',
       })
       .end((err, res) => {

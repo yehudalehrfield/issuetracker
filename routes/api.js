@@ -26,8 +26,8 @@ module.exports = (app, issueModel) => {
           created_by: req.body.created_by,
           created_on: todayDateAndTime,
           updated_on: todayDateAndTime,
-          assigned_to: req.body.assigned_to,
-          status_text: req.body.status_text,
+          assigned_to: req.body.assigned_to || '',
+          status_text: req.body.status_text || '',
         });
         // return the issue doc
         res.json(newIssue);
