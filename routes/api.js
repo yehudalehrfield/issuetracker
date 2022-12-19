@@ -36,7 +36,7 @@ module.exports = (app, issueModel) => {
       }
     })
 
-    .put(async (req, res) => {
+    .put((req, res) => {
       // const { project } = req.params; // necessary?
       const todayDateAndTime = new Date();
       const updatedFields = { updated_on: todayDateAndTime };
@@ -51,10 +51,7 @@ module.exports = (app, issueModel) => {
         res.json({ error: 'missing _id' });
       } else if (!mongoose.Types.ObjectId.isValid(req.body._id)) {
         // if invalid id, return update error
-        res.json({
-          error: 'could not update',
-          _id: req.body._id,
-        });
+        res.json({ error: 'could not update', _id: req.body._id });
       } else if (Object.keys(updatedFields).length < 3) { // no updated fields
         // if there are no updated fields, return error for no updates
         res.json({
@@ -64,15 +61,24 @@ module.exports = (app, issueModel) => {
       } else {
         try {
           // get the issue doc and update
-          await issueModel.findByIdAndUpdate(
-            mongoose.Types.ObjectId(req.body._id),
+          issueModel.findByIdAndUpdate(
+            req.body._id,
             updatedFields,
-            { returnDocument: 'after' },
+            { returnDocument: 'after' }, // remove?
+            (err, doc) => {
+              if (err || !doc) {
+                res.json({
+                  error: 'could not update',
+                  _id: req.body._id,
+                });
+              } else {
+                res.json({
+                  result: 'successfully updated',
+                  _id: req.body._id,
+                });
+              }
+            },
           );
-          res.json({
-            result: 'successfully updated',
-            _id: req.body._id,
-          });
         } catch {
           // catch any other errors, return update error
           // valid id but not exisiting (?)
@@ -84,7 +90,7 @@ module.exports = (app, issueModel) => {
       }
     })
 
-    .delete(async (req, res) => {
+    .delete((req, res) => {
       // const { project } = req.params; // necessary?
       if (!req.body._id) {
         // if missing id, return error
@@ -95,9 +101,14 @@ module.exports = (app, issueModel) => {
       } else {
         try {
           // delete doc from the database
-          await issueModel.findByIdAndDelete(req.body._id);
-          // return upon successful deletion
-          res.json({ result: 'successfully deleted', _id: req.body._id });
+          issueModel.findByIdAndDelete(req.body._id, (err, doc) => {
+            if (err || !doc) {
+              // return upon successful deletion
+              res.json({ error: 'could not delete', _id: req.body._id });
+            } else {
+              res.json({ result: 'successfully deleted', _id: req.body._id });
+            }
+          });
         } catch {
           // catch any other errors, return error in deletion
           // valid id but not exisiting (?)
