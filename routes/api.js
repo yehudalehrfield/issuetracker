@@ -36,7 +36,7 @@ module.exports = (app, issueModel) => {
       }
     })
 
-    .put(async (req, res) => {
+    .put((req, res) => {
       // const { project } = req.params; // necessary?
       const todayDateAndTime = new Date();
       const updatedFields = { updated_on: todayDateAndTime };
@@ -61,15 +61,24 @@ module.exports = (app, issueModel) => {
       } else {
         try {
           // get the issue doc and update
-          await issueModel.findByIdAndUpdate(
-            mongoose.Types.ObjectId(req.body._id),
+          issueModel.findByIdAndUpdate(
+            req.body._id,
             updatedFields,
-            { returnDocument: 'after' },
+            { returnDocument: 'after' }, // remove?
+            (err, doc) => {
+              if (err || !doc) {
+                res.json({
+                  error: 'could not update',
+                  _id: req.body._id,
+                });
+              } else {
+                res.json({
+                  result: 'successfully updated',
+                  _id: req.body._id,
+                });
+              }
+            },
           );
-          res.json({
-            result: 'successfully updated',
-            _id: req.body._id,
-          });
         } catch {
           // catch any other errors, return update error
           // valid id but not exisiting (?)
